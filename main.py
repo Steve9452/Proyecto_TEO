@@ -16,6 +16,10 @@ def miParser():
     tok = lexer.token()
     x = stack[-1]
     prevDataType = None
+
+    raiz = NodoDerivacion("Raíz")
+    nodo_actual = raiz
+
     while True:
         # print("Pila: ", stack)
         if x == tok.type and x == "eof":
@@ -23,7 +27,7 @@ def miParser():
                 print("\t[ El proceso ha finalizado con errores ]")
             else:
                 print("\t[ Fin del proceso ]")
-            return
+            return raiz
         else:
             if x == tok.type and x != "eof":
                 auxNextToken = lexer.token()
@@ -47,6 +51,8 @@ def miParser():
                         tok.lineno,
                         tok.lexpos,
                     )
+                    nodo_actual.agregar_hijo(NodoDerivacion(tok.type, tok.value))
+                    nodo_actual = nodo_actual.hijos[-1]  # Actualiza el nodo actual al último hijo agregado
 
                 stack.pop()
                 x = stack[-1]
@@ -90,6 +96,9 @@ def miParser():
                 x = stack[-1]
                 # print("=====================================================")
                 error = True
+                nodo_error = NodoDerivacion("Error", "Error en línea: {}".format(tok.lineno))
+                nodo_actual.agregar_hijo(nodo_error)
+                nodo_actual = nodo_error
 
             if x not in tokens :  # es no terminal
                 
@@ -122,11 +131,20 @@ def miParser():
                     stack.pop()
                     # print("Pila: ", stack)
                     x = stack[-1]
+                    
+
+                    nodo_error = NodoDerivacion("Error", "Error en línea: {}".format(tok.lineno))
+                    nodo_actual.agregar_hijo(nodo_error)
+                    nodo_actual = nodo_error
+
                 else:
                     stack.pop()
                     agregar_pila(celda)
                     x = stack[-1]
-
+                    nodo_produccion = NodoDerivacion("Producción", x)
+                    nodo_actual.agregar_hijo(nodo_produccion)
+                    nodo_actual = nodo_produccion
+    
 
 def buscar_en_tabla(no_terminal, terminal):
     for i in range(len(tabla)):
@@ -201,14 +219,27 @@ def imprimir_tabla_resumen():
         print("| {:20} | {:10} | {:15} | {:10} | {:10} |".format(nombre, tipo, valor, linea, columna))
     print("----------------------------------------------------------------------------------")
 
+class NodoDerivacion:
+    def __init__(self, tipo, valor=None):
+        self.tipo = tipo
+        self.valor = valor
+        self.hijos = []
 
+    def agregar_hijo(self, hijo):
+        self.hijos.append(hijo)
+
+def imprimir_arbol(nodo, nivel=0):
+    espacios = '  ' * nivel
+    print(f"{nodo.tipo}: {nodo.valor}")
+    for hijo in nodo.hijos:
+        imprimir_arbol(hijo, nivel + 1)
 
 
 def main():
-    miParser()
+    arbol_derivacion = miParser()
     # imprimir_tabla_simbolos()
     imprimir_tabla_resumen()
-
+    # imprimir_arbol(arbol_derivacion)
 
 if __name__ == "__main__":
     main()
