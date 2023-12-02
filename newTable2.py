@@ -173,6 +173,7 @@ tabla = [
     [STMT_PRIME, "parentesis_izquierdo", ["parentesis_izquierdo", ARGS_LIST, "parentesis_derecho", STMT_END]],
     [STMT_PRIME, "aumentar", [INC_DEC]],
     [STMT_PRIME, "reducir", [INC_DEC]],
+    [STMT_PRIME, "fin_instruccion", [STMT_END]],
     
     [PRINTF_STMT, "printf", ["printf", "parentesis_izquierdo", "const_string", "coma", ARGS_LIST, "parentesis_derecho", STMT_END]],
     [SCANF_STMT, "scanf", ["scanf", "parentesis_izquierdo", "const_string", "coma", SCANF_ARGS, "parentesis_derecho", STMT_END]],

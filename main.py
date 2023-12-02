@@ -92,19 +92,36 @@ def miParser():
                 error = True
 
             if x not in tokens :  # es no terminal
+                
                 celda = buscar_en_tabla(x, tok.type)
                 if celda is None:
                     if tok.type != "error":
-                        print(
-                            "ERROR en línea: ",
-                            tok.lineno,
-                            ", NO SE ESPERABA token de tipo ",
-                            symbols[tok.type],
-                            "\n",
-                        )
+                        print("Pila Error: ", stack)
+                        # print(
+                        #     "ERROR en línea: ",
+                        #     tok.lineno,
+                        #     ", NO SE ESPERABA token de tipo ",
+                        #     symbols[tok.type],
+                        #     "\n",
+                        # )
                         print("\nERROR en línea: ", tok.lineno, ", NO SE ESPERABA token de tipo ", tok.type,
                               "  se esperaba  ", x, "  en", tok.value, "\n")
-                    return
+                    # return
+                    # while tok.type not in tokens and tok.type != "eof":
+                    #     print("Siguiente token: ", tok.type, tok.value, tok.lineno, tok.lexpos)
+                    #     tok = lexer.token()
+                    #     input()
+                    # input("Fuera while")
+                    # if tok.type == "eof":
+                    #     print("Fin de archivo alcanzado después de un error.")
+                    #     return
+
+                    lexer.skip(0)
+                    tok = lexer.token()
+                    # print("Siguiente token: ", tok.type, tok.value, tok.lineno, tok.lexpos)
+                    stack.pop()
+                    # print("Pila: ", stack)
+                    x = stack[-1]
                 else:
                     stack.pop()
                     agregar_pila(celda)

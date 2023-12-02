@@ -1,7 +1,9 @@
 
 int main(){
 	int n = 123;
-    int c;
+	int c;
+    c;
+	c
 	int z = 455;
 	char algo = 'afasda';
 	int algo2 = 'a';
