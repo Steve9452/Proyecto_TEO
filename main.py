@@ -22,6 +22,7 @@ def miParser():
 
     while True:
         # print("Pila: ", stack)
+        flag = True
         if x == tok.type and x == "eof":
             if error:
                 print("\t[ El proceso ha finalizado con errores ]")
@@ -93,19 +94,24 @@ def miParser():
                 # print("Siguiente token: ", tok.type, tok.value, tok.lineno, tok.lexpos)
                 stack.pop()
                 # print("Pila: ", stack)
-                x = stack[-1]
+                try:
+                    x = stack[-1]
+                except IndexError:
+                    print("Error en línea: {}".format(tok.lineno))
+                    return
                 # print("=====================================================")
                 error = True
                 nodo_error = NodoDerivacion("Error", "Error en línea: {}".format(tok.lineno))
                 nodo_actual.agregar_hijo(nodo_error)
                 nodo_actual = nodo_error
+                flag=False
 
-            if x not in tokens :  # es no terminal
+            if x not in tokens and flag:  # es no terminal
                 
                 celda = buscar_en_tabla(x, tok.type)
                 if celda is None:
                     if tok.type != "error":
-                        print("Pila Error: ", stack)
+                        # print("Pila Error: ", stack)
                         # print(
                         #     "ERROR en línea: ",
                         #     tok.lineno,

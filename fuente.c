@@ -5,12 +5,12 @@ int main(){
     c;
 	c;
 	int z = 455;
-	char algo = 'afasda';
-	int algo2 = 'a';
+	char variable = 'afasda';
+	int variable2 = 'a';
 	// printf("hola mundo", a, b, c);
 	printf(void, a, b, 35);
 	
-	char letter = 'ahgjg';
+	char letters = 'ahgjg';
 	a = 15;
 	b = 20;
 	c = a + b;
@@ -23,17 +23,17 @@ int main(){
 
 	    }
 	}
+	
 
-
-	printf(void, a, b, 35);
+	printf(" hello world ", a, b, 35);
 	scanf("%d", &a, &b, &c);
 	algo = '0';
 	
 	
-	printf("void", a, b, 35);
+	printf(void, a, b, 35);
 
 	
-	do{
+	do
         char ch = 10;
 	}while (n < 4);
 

@@ -73,7 +73,7 @@ MORE_SCANF_ARGS -> ''
 
 '''
 
-
+# Simbolos no terminales
 PROGRAM = 0
 FUNC = 1
 TYPE = 2
