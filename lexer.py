@@ -159,6 +159,8 @@ def t_error(t):
 
 stack = ["eof", 0]
 
+
+
 # Build the lexer
 lexer = lex.lex()
 

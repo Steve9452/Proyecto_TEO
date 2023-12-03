@@ -110,6 +110,50 @@ SCANF_STMT = 32
 SCANF_ARGS = 33
 MORE_SCANF_ARGS = 34
 
+NonTerminals = {
+    "PROGRAM": 0,
+    "FUNC": 1,
+    "TYPE": 2,
+    "ARGS": 3,
+    "MORE_ARGS": 4,
+    "STMTS": 5,
+    "STMT": 6,
+    "DECL": 7,
+    "INIT": 8,
+    "ARRAY_INIT": 9,
+    "EXPR_LIST": 10,
+    "MORE_EXPRS": 11,
+    "ARGS_LIST": 12,
+    "CONTROL": 13,
+    "IF_STMT": 14,
+    "ELSE_PART": 15,
+    "FOR_STMT": 16,
+    "WHILE_STMT": 17,
+    "DO_WHILE_STMT": 18,
+    "COND_EXPR": 19,
+    "RETURN": 20,
+    "EXPR": 21,
+    "EXPR_PRIME": 22,
+    "TERM": 23,
+    "TERM_PRIME": 24,
+    "FACTOR": 25,
+    "STMT_END": 26,
+    "REL_OP": 27,
+    "STMT_PRIME": 28,
+    "INC_DEC": 29,
+    "MORE_ARGS_LIST": 30,
+    "PRINTF_STMT": 31,
+    "SCANF_STMT": 32,
+    "SCANF_ARGS": 33,
+    "MORE_SCANF_ARGS": 34,
+}
+
+def getNonTerminalName(index):
+    for key in NonTerminals:
+        if NonTerminals[key] == index:
+            return key
+
+# Simbolos terminales
 
 tabla = [
     [PROGRAM, "int" ,   [FUNC, PROGRAM]],
