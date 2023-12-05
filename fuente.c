@@ -2,7 +2,8 @@ int main(){
 	int n = 123;
 	// int c;
     // c;
-	// c;
+	n =2 * 4;
+	// r= a/b;
 	// int z = 455;
 	// char variable = 'afasda';
 	// int variable2 = 'a';
@@ -17,11 +18,15 @@ int main(){
 	
 	// n = 2;
 	// f1();
-	// for (int i = 0; i < n; i++){
-	//     while(n < 4){
-
-	//     }
-	// }
+	while (a == 4)
+	{
+		a = 2;
+	}
+	
+	while (a == 7777777)
+	{
+		a = 2;
+	}
 	
 
 	// printf(" hello world ", a, b, 35);
@@ -50,6 +55,8 @@ int main(){
 	return 0;
 }
 
+int f1(){
+}
 
 // int prueba(int a, int b){
 // 	int c = 0;

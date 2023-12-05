@@ -7,7 +7,13 @@ from symbols import symbols
 from newTable2 import tabla, getNonTerminalName
 
 
-def miParser():
+class parentNode:
+    def __init__(self, node, toNonTerminal=None):
+        self.node = node
+        self.fromNonTerminal = toNonTerminal
+
+
+def miParser(ats=[]):
     f = open("fuente.c", "r")
     file = f.read() + "\n$"
     lexer.input(file)
@@ -18,144 +24,206 @@ def miParser():
     prevDataType = None
 
     raiz = NodoDerivacion("Raíz")
-    nodo_actual = raiz
 
+    
+    context_stack = []
+    # context_stack.append(ats)
+    # print("Contexto inicial: ", context_stack[-1].type)
     while True:
-        # print("Pila: ", stack, "\n", "Entrada:\n\tTipo:", tok.type,"Valor:", tok.value)
+        # if stack[-1] == 1:
+        #     print(">>>>>>>>>>>>Pila: ", stack, "\n", "Entrada:\n\tTipo:", tok.type,"Valor:", tok.value)
+        # else:
+        #     print("Pila: ", stack, "\n", "Entrada:\n\tTipo:", tok.type,"Valor:", tok.value)
+        print("Pila: ",x,  getNonTerminalName(x),  "\n")
+
+        stmt = getNonTerminalName(x)
+        if stmt ==  "STMT" or stmt == "FUNC" or stmt == "FOR_STMT" or stmt == "WHILE_STMT" or stmt == "STMTS" or stmt == "DECL":
+            print("=================Creacion de contexto==============================")
+
+            print("Contexto Abierto New  node:   ",getNonTerminalName(x))
+            try:
+                print("con padre", context_stack[-1].type)
+            except IndexError:
+                print("con padre: ", "None")
+            context_stack.append(NewNode(getNonTerminalName(x), value=getNonTerminalName(x)))
+            current_node = context_stack[-1]
+            
+        elif x ==  'fin_instruccion' or (x == 'fin_bloque' and context_stack[-1].type == "WHILE_STMT") :
+            print("===================Enlace de nodos============================")
+            
+            if context_stack[-1].type == "WHILE_STMT" and x == 'fin_bloque' :
+                print_ast(current_node)
+                print("---------------")
+                print("Contexto Cerrado:   ", context_stack[-2].type, current_node.type)
+                context_stack[-2].children.append(current_node)
+                print_ast(context_stack[-2])
+                
+                print("---------------")
+                current_node = context_stack.pop()
+                print(len(context_stack))
+                
+                print("---------------")
+                context_stack[-2].children.append(current_node)
+                print_ast(context_stack[-2])
+                context_stack.pop()
+                current_node = context_stack[-1]
+
+            elif context_stack[-1].type == "DECL":
+                print(context_stack[-2].type,"<--", current_node.type)
+                context_stack[-2].children.append(current_node)
+                context_stack.pop()
+                current_node = context_stack.pop()
+                print_ast(current_node)
+                print_ast(context_stack[-1])
+                context_stack[-1].children.append(current_node)
+                print_ast(context_stack[-1])
+                print(len(context_stack))
+                current_node = context_stack[-1]
+
+            else:
+                print(context_stack[-2].type,"<--", current_node.type)
+                # print_ast(context_stack[-2])
+                
+                context_stack[-2].children.append(current_node)
+                # ats.children.append( context_stack.pop())
+                
+                context_stack.pop()
+                current_node = context_stack[-1]
+                print_ast(context_stack[-1])
+                print(len(context_stack))
         flag = True
         if x == tok.type and x == "eof":
+            
+            ats.children.append(context_stack[0])
+            # print(context_stack[0].type)
             if error:
                 print("\t[ El proceso ha finalizado con errores ]")
             else:
                 print("\t[ Fin del proceso ]")
             return raiz
-        else:
-            if x == tok.type and x != "eof":
-                print("Pila: ", stack, "\n", "Entrada:\n\tTipo:", tok.type,"Valor:", tok.value)
-                print("=============================================================")
-                auxNextToken = lexer.token()
-                if tok.type == "int" or tok.type == "float" or tok.type == "char":
-                    prevDataType = tok.type
 
-                if (tok.type == "id") and auxNextToken.type == "asignacion":
-                    # print("---------id-----------")
-                    # print(stack[-1])
-                    # print("Linea: ", tok.lineno)
-                    # print("Actual", tok.value)
-                    # print("Tipo:", tok.type)
-                    # print("Siguiente:" , auxNextToken.type, auxNextToken.value, auxNextToken.lineno, auxNextToken.lexpos)
-                    lexerClonado = lexer.clone()
-                    auxNext2Token = lexerClonado.token()
+        
+        # if getNonTerminalName(x) != None:
+        #     print("No terminal :", getNonTerminalName(x))
+        
+        if x == tok.type and x != "eof":
+            # print("=============================================================")
+            
+            # print(current_node.type)
+            auxNextToken = lexer.token()
 
-                    insertar_o_actualizar_simbolo(
-                        prevDataType,
-                        tok.value,
-                        auxNext2Token.value,
-                        tok.lineno,
-                        tok.lexpos,
-                    )
-                print("Entro")
-                nodo_actual.agregar_hijo(NodoDerivacion(tok.type, tok.value))
-                print(nodo_actual.hijos[-1].tipo)
-                nodo_actual = nodo_actual.hijos[-1]  # Actualiza el nodo actual al último hijo agregado
+            # Almacena el tipo de dato de la variable auxiliar por si en la siguiente interacion es requerida.
+            if tok.type == "int" or tok.type == "float" or tok.type == "char":
+                prevDataType = tok.type
 
-                stack.pop()
-                x = stack[-1]
-                tok = auxNextToken
 
-            if x in tokens and x != tok.type:
-                # print("Error Pila: ", stack, stack[-1])
-                print(
-                    "ERROR en línea: ",
-                    tok.lineno,
-                    " se esperaba ",
-                    symbols[x],
-                    "en la posicion: ",
-                    tok.lexpos,
-                    "  en  '",
+            # Var assignment.
+            if (tok.type == "id") and auxNextToken.type == "asignacion":
+                # print("---------id-----------")
+                # print(stack[-1])
+                # print("Linea: ", tok.lineno)
+                # print("Actual", tok.value)
+                # print("Tipo:", tok.type)
+                # print("Siguiente:" , auxNextToken.type, auxNextToken.value, auxNextToken.lineno, auxNextToken.lexpos)
+                lexerClonado = lexer.clone()
+                auxNext2Token = lexerClonado.token()
+
+                insertar_o_actualizar_simbolo(
+                    prevDataType,
                     tok.value,
-                    "'\n",
+                    auxNext2Token.value,
+                    tok.lineno,
+                    tok.lexpos,
                 )
 
-              
-                # current_line = file[tok.lexpos :]
-                # split_token = current_line[len(tok.value):]
-                # corrected_input = getSymbol[x] + split_token
-                
-                # print("==========================")
-                # print(corrected_input)
-                # print("==========================")
 
-                
-                # # tok = lexer.token()
-                # lexer.input(corrected_input)
-                # tok = lexer.token()
 
-                # print("=====================================================")
-                # print("Siguiente token: ", tok.type, tok.value, tok.lineno, tok.lexpos)
+
+
+
+            # print("Agregando a la pila el nodo: ", current_node.type, " con valor: ", tok.value)
+            context_stack[-1].children.append(NewNode(tok.type, leaf=tok.value))
+            # if tok.type == "id" or tok.type == "int" or tok.type == "float" or tok.type == "char":
+            #     current_node.children.append(NewNode(tok.type, leaf=tok.value))
+            
+
+
+            stack.pop()
+            x = stack[-1]
+            tok = auxNextToken
+
+        if x in tokens and x != tok.type:
+            # print("Error Pila: ", stack, stack[-1])
+            print(
+                "ERROR en línea: ",
+                tok.lineno,
+                " se esperaba ",
+                symbols[x],
+                "en la posicion: ",
+                tok.lexpos,
+                "  en  '",
+                tok.value,
+                "'\n",
+            )
+
+            
+            lexer.skip(0)
+            tok = lexer.token()
+            stack.pop()
+            try:
+                x = stack[-1]
+            except IndexError:
+                print("Error en línea: {}".format(tok.lineno))
+                return
+            error = True
+            flag=False
+
+        if x not in tokens and flag:  # es no terminal
+            
+            celda = buscar_en_tabla(x, tok.type)
+            if celda is None:
+                if tok.type != "error":
+
+                    print("\nERROR en línea: ", tok.lineno, ", NO SE ESPERABA token de tipo ", tok.type,
+                            "  se esperaba  ", x, "  en", tok.value, "\n")
+
+
                 lexer.skip(0)
                 tok = lexer.token()
-                # print("Siguiente token: ", tok.type, tok.value, tok.lineno, tok.lexpos)
                 stack.pop()
-                # print("Pila: ", stack)
-                try:
-                    x = stack[-1]
-                except IndexError:
-                    print("Error en línea: {}".format(tok.lineno))
-                    return
-                # print("=====================================================")
-                error = True
-                nodo_error = NodoDerivacion("Error", "Error en línea: {}".format(tok.lineno))
-                nodo_actual.agregar_hijo(nodo_error)
-                nodo_actual = nodo_error
-                flag=False
 
-            if x not in tokens and flag:  # es no terminal
+                x = stack[-1]
                 
-                celda = buscar_en_tabla(x, tok.type)
-                if celda is None:
-                    if tok.type != "error":
-                        # print("Pila Error: ", stack)
-                        # print(
-                        #     "ERROR en línea: ",
-                        #     tok.lineno,
-                        #     ", NO SE ESPERABA token de tipo ",
-                        #     symbols[tok.type],
-                        #     "\n",
-                        # )
-                        print("\nERROR en línea: ", tok.lineno, ", NO SE ESPERABA token de tipo ", tok.type,
-                              "  se esperaba  ", x, "  en", tok.value, "\n")
-                    # return
-                    # while tok.type not in tokens and tok.type != "eof":
-                    #     print("Siguiente token: ", tok.type, tok.value, tok.lineno, tok.lexpos)
-                    #     tok = lexer.token()
-                    #     input()
-                    # input("Fuera while")
-                    # if tok.type == "eof":
-                    #     print("Fin de archivo alcanzado después de un error.")
-                    #     return
 
-                    lexer.skip(0)
-                    tok = lexer.token()
-                    # print("Siguiente token: ", tok.type, tok.value, tok.lineno, tok.lexpos)
-                    stack.pop()
-                    # print("Pila: ", stack)
-                    x = stack[-1]
+
+ 
+
+            else:              
+                # print("Simbolo no terminal ")
+                # print("Pila: ", stack, "\n", "Entrada:\n\tTipo:", tok.type,"Valor:", tok.value)
+                if getNonTerminalName(x) != None and False:
+                    # print("No terminal :", getNonTerminalName(x))
+                    if getNonTerminalName(x) == "FUNC" or getNonTerminalName(x) == "DECL" or getNonTerminalName(x) == "STMTS":
+                        print("Agregando a la pila el nodo: ", current_node.type, " con valor: ", getNonTerminalName(x))
+                        # print("Ultimo elemento del stack es : ", stack , "and : ", x)
+                        current_node.children.append(NewNode(getNonTerminalName(x), value=getNonTerminalName(x)))
+
+                        context_stack.append(current_node)
+                        print("Nodo agregado a contexto",current_node.type,"context actual",context_stack[-1].type, "Con longitud: ", len(context_stack))
+                        current_node = current_node.children[-1]
+                        print("===============================================")
+
+                if getNonTerminalName(x) == "STMTS" or getNonTerminalName(x) == "STMT"  :
+                    print(">>>>>>>>>>>>>>>>>>>>",getNonTerminalName(x))
+
                     
-
-                    nodo_error = NodoDerivacion("Error", "Error en línea: {}".format(tok.lineno))
-                    nodo_actual.agregar_hijo(nodo_error)
-                    nodo_actual = nodo_error
-
-                else:
-                    stack.pop()
-                    agregar_pila(celda)
-                    x = stack[-1]
-                    
-                    nodo_produccion = NodoDerivacion(getNonTerminalName(x), x)
-                    nodo_actual.agregar_hijo(nodo_produccion)
-                    nodo_actual = nodo_produccion
-    
+                stack.pop()
+                agregar_pila(celda)
+                x = stack[-1]            
+                # print("x::", getNonTerminalName(x))
+                # print(stack)
+                # print("Celda::", celda)
+                        # current_node = context_stack.pop()
 
 def buscar_en_tabla(no_terminal, terminal):
     for i in range(len(tabla)):
@@ -242,8 +310,30 @@ class NodoDerivacion:
 
 
 
+class NewNode:
+    def __init__(self, type, children=None, value=None, leaf=None):
+        self.type = type
+        self.value = value
+        if children:
+            self.children = children
+        else:
+            self.children = []
+        self.leaf = leaf
 
 
+class UnexpectedTokenError(Exception):
+    pass
+
+
+
+def print_ast(node, indent=""):
+    print(f"{indent}{node.type}:", end="")
+    if node.leaf:
+        print(f"leaf: {node.leaf}")
+    else:
+        print()
+    for child in node.children:
+        print_ast(child, indent + "  ")
 
 def imprimir_arbol(nodo, space = ""):
     
@@ -253,11 +343,15 @@ def imprimir_arbol(nodo, space = ""):
 
 
 def main():
-    arbol_derivacion = miParser()
+    ats = NewNode("Raiz")
+
+    arbol_derivacion = miParser(ats)
     # imprimir_tabla_simbolos()
     # imprimir_tabla_resumen()
-    imprimir_arbol(arbol_derivacion)
-    
+    # imprimir_arbol(arbol_derivacion)
+    print("AST: =======================================================")
+    print_ast(ats)
+
 
 if __name__ == "__main__":
     main()
