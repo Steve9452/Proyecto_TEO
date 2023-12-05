@@ -7,6 +7,8 @@ from symbols import symbols
 from newTable2 import tabla, getNonTerminalName
 
 
+string_file = ""
+
 class parentNode:
     def __init__(self, node, toNonTerminal=None):
         self.node = node
@@ -27,89 +29,78 @@ def miParser(ats=[]):
 
     
     context_stack = []
-    # context_stack.append(ats)
-    # print("Contexto inicial: ", context_stack[-1].type)
     while True:
-        # if stack[-1] == 1:
-        #     print(">>>>>>>>>>>>Pila: ", stack, "\n", "Entrada:\n\tTipo:", tok.type,"Valor:", tok.value)
-        # else:
-        #     print("Pila: ", stack, "\n", "Entrada:\n\tTipo:", tok.type,"Valor:", tok.value)
-        print("Pila: ",x,  getNonTerminalName(x),  "\n")
+
+        # print("Pila: ",x,  getNonTerminalName(x),  "\n")
 
         stmt = getNonTerminalName(x)
         if stmt ==  "STMT" or stmt == "FUNC" or stmt == "FOR_STMT" or stmt == "WHILE_STMT" or stmt == "STMTS" or stmt == "DECL":
-            print("=================Creacion de contexto==============================")
+            # print("=================Creacion de contexto==============================")
 
-            print("Contexto Abierto New  node:   ",getNonTerminalName(x))
-            try:
-                print("con padre", context_stack[-1].type)
-            except IndexError:
-                print("con padre: ", "None")
-            context_stack.append(NewNode(getNonTerminalName(x), value=getNonTerminalName(x)))
+            # print("Contexto Abierto New  node:   ",getNonTerminalName(x))
+            # try:
+            #     print("con padre", context_stack[-1].type)
+            # except IndexError:
+            #     print("con padre: ", "None")
+            context_stack.append(NewNode(getNonTerminalName(x), value=getNonTerminalName(x), line=tok.lineno, column=tok.lexpos))
             current_node = context_stack[-1]
             
         elif x ==  'fin_instruccion' or (x == 'fin_bloque' and context_stack[-1].type == "WHILE_STMT") :
-            print("===================Enlace de nodos============================")
+            # print("===================Enlace de nodos============================")
             
             if context_stack[-1].type == "WHILE_STMT" and x == 'fin_bloque' :
-                print_ast(current_node)
-                print("---------------")
-                print("Contexto Cerrado:   ", context_stack[-2].type, current_node.type)
+                # print_ast(current_node)
+                # print("---------------")
+                # print("Contexto Cerrado:   ", context_stack[-2].type, current_node.type)
                 context_stack[-2].children.append(current_node)
-                print_ast(context_stack[-2])
+                # print_ast(context_stack[-2])
                 
-                print("---------------")
+                # print("---------------")
                 current_node = context_stack.pop()
-                print(len(context_stack))
+                # print(len(context_stack))
                 
-                print("---------------")
+                # print("---------------")
                 context_stack[-2].children.append(current_node)
-                print_ast(context_stack[-2])
+                # print_ast(context_stack[-2])
                 context_stack.pop()
                 current_node = context_stack[-1]
 
             elif context_stack[-1].type == "DECL":
-                print(context_stack[-2].type,"<--", current_node.type)
+                # print(context_stack[-2].type,"<--", current_node.type)
                 context_stack[-2].children.append(current_node)
                 context_stack.pop()
                 current_node = context_stack.pop()
-                print_ast(current_node)
-                print_ast(context_stack[-1])
+                # print_ast(current_node)
+                # print_ast(context_stack[-1])
                 context_stack[-1].children.append(current_node)
-                print_ast(context_stack[-1])
-                print(len(context_stack))
+                # print_ast(context_stack[-1])
+                # print(len(context_stack))
                 current_node = context_stack[-1]
 
             else:
-                print(context_stack[-2].type,"<--", current_node.type)
+                # print(context_stack[-2].type,"<--", current_node.type)
                 # print_ast(context_stack[-2])
-                
+    
                 context_stack[-2].children.append(current_node)
                 # ats.children.append( context_stack.pop())
                 
                 context_stack.pop()
                 current_node = context_stack[-1]
-                print_ast(context_stack[-1])
-                print(len(context_stack))
+                # print_ast(context_stack[-1])
+                # print(len(context_stack))
         flag = True
         if x == tok.type and x == "eof":
             
             ats.children.append(context_stack[0])
-            # print(context_stack[0].type)
             if error:
                 print("\t[ El proceso ha finalizado con errores ]")
             else:
                 print("\t[ Fin del proceso ]")
             return raiz
 
-        
-        # if getNonTerminalName(x) != None:
-        #     print("No terminal :", getNonTerminalName(x))
+
         
         if x == tok.type and x != "eof":
-            # print("=============================================================")
-            
-            # print(current_node.type)
             auxNextToken = lexer.token()
 
             # Almacena el tipo de dato de la variable auxiliar por si en la siguiente interacion es requerida.
@@ -136,17 +127,9 @@ def miParser(ats=[]):
                     tok.lexpos,
                 )
 
+            context_stack[-1].children.append(NewNode(tok.type, leaf=tok.value, line=tok.lineno, column=tok.lexpos))
 
-
-
-
-
-            # print("Agregando a la pila el nodo: ", current_node.type, " con valor: ", tok.value)
-            context_stack[-1].children.append(NewNode(tok.type, leaf=tok.value))
-            # if tok.type == "id" or tok.type == "int" or tok.type == "float" or tok.type == "char":
-            #     current_node.children.append(NewNode(tok.type, leaf=tok.value))
-            
-
+        
 
             stack.pop()
             x = stack[-1]
@@ -191,39 +174,23 @@ def miParser(ats=[]):
                 lexer.skip(0)
                 tok = lexer.token()
                 stack.pop()
-
                 x = stack[-1]
                 
-
 
  
 
             else:              
                 # print("Simbolo no terminal ")
                 # print("Pila: ", stack, "\n", "Entrada:\n\tTipo:", tok.type,"Valor:", tok.value)
-                if getNonTerminalName(x) != None and False:
-                    # print("No terminal :", getNonTerminalName(x))
-                    if getNonTerminalName(x) == "FUNC" or getNonTerminalName(x) == "DECL" or getNonTerminalName(x) == "STMTS":
-                        print("Agregando a la pila el nodo: ", current_node.type, " con valor: ", getNonTerminalName(x))
-                        # print("Ultimo elemento del stack es : ", stack , "and : ", x)
-                        current_node.children.append(NewNode(getNonTerminalName(x), value=getNonTerminalName(x)))
-
-                        context_stack.append(current_node)
-                        print("Nodo agregado a contexto",current_node.type,"context actual",context_stack[-1].type, "Con longitud: ", len(context_stack))
-                        current_node = current_node.children[-1]
-                        print("===============================================")
-
-                if getNonTerminalName(x) == "STMTS" or getNonTerminalName(x) == "STMT"  :
-                    print(">>>>>>>>>>>>>>>>>>>>",getNonTerminalName(x))
+                
+                # if getNonTerminalName(x) == "STMTS" or getNonTerminalName(x) == "STMT"  :
+                #     print(">>>>>>>>>>>>>>>>>>>>",getNonTerminalName(x))
 
                     
                 stack.pop()
                 agregar_pila(celda)
                 x = stack[-1]            
-                # print("x::", getNonTerminalName(x))
-                # print(stack)
-                # print("Celda::", celda)
-                        # current_node = context_stack.pop()
+
 
 def buscar_en_tabla(no_terminal, terminal):
     for i in range(len(tabla)):
@@ -311,7 +278,7 @@ class NodoDerivacion:
 
 
 class NewNode:
-    def __init__(self, type, children=None, value=None, leaf=None):
+    def __init__(self, type, children=None, value=None, leaf=None, line=None, column=None):
         self.type = type
         self.value = value
         if children:
@@ -319,7 +286,8 @@ class NewNode:
         else:
             self.children = []
         self.leaf = leaf
-
+        self.line = line
+        self.column = column
 
 class UnexpectedTokenError(Exception):
     pass
@@ -327,19 +295,226 @@ class UnexpectedTokenError(Exception):
 
 
 def print_ast(node, indent=""):
-    print(f"{indent}{node.type}:", end="")
+    print(f"{indent}|{node.type}:", end="")
     if node.leaf:
-        print(f"leaf: {node.leaf}")
+        print(f"Valor: {node.leaf}")
     else:
         print()
     for child in node.children:
         print_ast(child, indent + "  ")
+
+
+
 
 def imprimir_arbol(nodo, space = ""):
     
     print(f"{space}{nodo.tipo}: {nodo.valor} : {getNonTerminalName(nodo.valor)} Hijos: {len(nodo.hijos)}")
     for hijo in nodo.hijos:
         imprimir_arbol(hijo, space + " ")
+
+
+def print_children(node, indent=""):
+    print(f"{indent}|{node.type}:", end="")
+# Analisis semántico
+
+def analizador_semantico(nodo):
+    if nodo.type == 'FUNC':
+        # print("Analizando función")
+        analizar_funcion(nodo)
+        
+    if nodo.type == 'DECL':
+        # print("Analizando declaración")
+        analizar_declaracion(nodo)
+    # if nodo.type == 'FOR_STMT':
+    #     print("Analizando for")
+    # if nodo.type == 'WHILE_STMT':
+    #     print("Analizando while")
+    if nodo.type == 'STMT':
+        # print("Analizando statement")
+        analizar_statement(nodo)
+    
+    for child in nodo.children:
+        analizador_semantico(child)
+
+
+
+def analizar_statement(nodo):
+    if nodo.children[0].type == 'DECL':
+        return
+    childrens = []
+    for child in nodo.children:
+        # print(child.type)
+        childrens.append(child)
+    
+    if childrens[0].type == 'id' and childrens[1].type == 'asignacion':
+        if childrens[2].type == 'const_int':
+            pass
+        elif childrens[2].type == 'const_float':
+            pass
+        elif childrens[2].type == 'const_char':
+            pass
+        elif childrens[2].type == 'id':
+            pass
+        else:
+            print("El valor de la variable en la línea: ", childrens[0].line, " no es válido: ")
+            # print(functionInit.type, functionReturnValue.type)
+
+
+def analizar_funcion(nodo):
+    childrens = []
+    for child in nodo.children:
+        # print(child.type)
+        childrens.append(child)
+
+    functionReturn = childrens[-3]
+    functionInit = childrens[0]
+    functionReturnValue = functionReturn.children[1]
+    
+
+    if existe_variable(functionInit.leaf):
+        print("La variable en la línea: ", functionInit.line, " ya existe")
+        return
+
+    # print(functionReturnValue.type, functionInit.type)
+    if functionInit.type == 'int' and functionReturnValue.type == 'const_int':
+        insertar_variable(functionInit.type, functionInit.leaf, functionReturnValue.leaf, functionInit.line, functionInit.column)
+    elif functionInit.type == 'float' and functionReturnValue.type == 'const_float':
+        insertar_variable(functionInit.type, functionInit.leaf, functionReturnValue.leaf, functionInit.line, functionInit.column)
+    elif functionInit.type == 'char' and functionReturnValue.type == 'const_char':
+        insertar_variable(functionInit.type, functionInit.leaf, functionReturnValue.leaf, functionInit.line, functionInit.column)
+    else:
+        print("El valor de retorno de la funcion en la línea: ", functionReturnValue.line, " no es válido: ")
+        # print(functionInit.type, functionReturnValue.type)
+
+
+def analizar_declaracion(nodo):
+    childrens = []
+    for child in nodo.children:
+        # print(child.type)
+        childrens.append(child)
+    varType = childrens[0]
+    varName = childrens[1]
+    valueType = childrens[3]
+
+    if existe_variable(varName.leaf):
+        print("La variable en la línea: ", varName.line, " ya existe")
+        return
+    
+    # print(varType.type, varName.type, valueType.type)
+    if varType.type == 'int' and valueType.type == 'const_int':
+        insertar_variable(varType.type, varName.leaf, valueType.leaf, varName.line, varName.column)
+    elif varType.type == 'float' and valueType.type == 'const_float':
+        insertar_variable(varType.type, varName.leaf, valueType.leaf, varName.line, varName.column)
+    elif varType.type == 'char' and valueType.type == 'const_char':
+        insertar_variable(varType.type, varName.leaf, valueType.leaf, varName.line, varName.column)
+    else:
+        print("El valor de la variable en la línea: ", varName.line, " no es de tipo: ", varType.type)
+        # print(functionInit.type, functionReturnValue.type)
+
+tabla_variables = defaultdict(list)
+
+def insertar_variable(tipo, nombre, valor, linea, columna):
+    tabla_variables[nombre].append([tipo, valor, linea, columna])
+
+def existe_variable(nombre):
+    return nombre in tabla_variables
+
+
+def print_ast(node, indent=""):
+    print(f"{indent}|{node.type}:", end="")
+    if node.leaf:
+        print(f"Valor: {node.leaf}")
+    else:
+        print()
+    for child in node.children:
+        print_ast(child, indent + "  ")
+
+
+
+def generate_p_code(node):
+    if node.type == 'FUNC':
+
+        generate_p_code_func(node)
+
+    if node.type == 'DECL':
+
+        generate_p_code_decl(node)
+    # if nodo.type == 'FOR_STMT':
+    #     print("Analizando for")
+    # if nodo.type == 'WHILE_STMT':
+    #     print("Analizando while")
+    if node.type == 'STMT':
+
+        generate_p_code_stmt(node)
+    
+    for child in node.children:
+        generate_p_code(child)
+
+
+def generate_p_code_func(node):
+    
+    p_code = ""
+    childrens = []
+    for child in node.children:
+
+        childrens.append(child)
+
+    functionInit = childrens[1]
+
+    global string_file 
+    p_code += "\nFUNCTION\t" + functionInit.leaf + "\n"
+    
+    p_code += "BEGIN\n"
+    for child in childrens :
+        # print("Analisis" + child.type)
+        if child.type == 'STMT':
+            generate_p_code_stmt(child)
+    
+    p_code += "END_FUNCTION\n"
+    
+    # add to file
+    string_file += p_code
+
+
+
+def generate_p_code_decl(node):
+    p_code = ""
+    childrens = []
+    for child in node.children:
+        childrens.append(child)
+
+    global string_file 
+
+    varType = childrens[0]
+    varName = childrens[1]
+    valueType = childrens[3]
+
+    p_code += "DECLARE_"+varType.type.upper()+"\t"+varName.leaf+"\n\tLOAD_VALUE\t"+str( valueType.leaf)+"\n"
+
+    # add to file
+    string_file += p_code
+
+
+def generate_p_code_stmt(node):
+    if node.children[0].type == 'DECL':
+        return
+    p_code = ""
+    childrens = []
+    for child in node.children:
+        # print(child.type)
+        childrens.append(child)
+    
+    global string_file 
+
+    if childrens[0].type == 'id' and childrens[1].type == 'asignacion':
+
+        p_code += "\tLOAD_VALUE\t"+str(childrens[2].leaf)+"\n"
+        p_code += "\tSTORE_VALUE\t"+childrens[0].leaf+"\n"
+        
+
+    # add to file
+    string_file += p_code
+
 
 
 def main():
@@ -349,9 +524,27 @@ def main():
     # imprimir_tabla_simbolos()
     # imprimir_tabla_resumen()
     # imprimir_arbol(arbol_derivacion)
-    print("AST: =======================================================")
-    print_ast(ats)
 
+    
+    # print("======================== Arbol de análisis sintáctico ========================")
+    # print_ast(ats)
+
+    
+    analizador_semantico(ats)
+    
+    # clean file
+    file = open("p_code.txt", "w")
+    file.write("")
+    file.close()
+
+    generate_p_code(ats)
+    # print("======================== Código P ========================")
+    # print(string_file)
+
+    # write to file
+    file = open("p_code.txt", "w")
+    file.write(string_file)
+    file.close()
 
 if __name__ == "__main__":
     main()
